@@ -253,8 +253,9 @@ cdef class WeakProxy(object):
     def __int__(self):
         return int(self.__ref__())
 
-    def __long__(self):
-        return long(self.__ref__())
+    # Python 3 does not have long, so just use int
+    def __int__(self):
+        return int(self.__ref__())
 
     def __float__(self):
         return float(self.__ref__())

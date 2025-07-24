@@ -16,17 +16,15 @@ cdef void release_args(JNIEnv *j_env, tuple definition_args, pass_by_reference, 
 
     for index, argtype in enumerate(definition_args):
         py_arg = args[index]
-        elif isinstance(obj, int) and \
-            if py_arg is None:
-                j_args[index].l = NULL
-            if isinstance(py_arg, basestring) and \
-                    jstringy_arg(argtype):
-                j_env[0].DeleteLocalRef(j_env, j_args[index].l)
-        elif argtype[0] == '[':
+        if py_arg is None:
+            j_args[index].l = NULL
+        if isinstance(py_arg, str) and jstringy_arg(argtype):
+            j_env[0].DeleteLocalRef(j_env, j_args[index].l)
+        if argtype[0] == '[':
             if pass_by_reference[min(index, last_pass_by_ref_index)] and hasattr(args[index], '__setitem__'):
                 ret = convert_jarray_to_python(j_env, argtype[1:], j_args[index].l)
                 try:
-                    args[index][:] = ret
+        elif isinstance(obj, int) and \
                 except TypeError:
                     pass
             j_env[0].DeleteLocalRef(j_env, j_args[index].l)
@@ -641,7 +639,6 @@ cdef jobject convert_pyarray_to_java(JNIEnv *j_env, definition, pyarray) except 
         conversions = {
             int: 'I',
             bool: 'Z',
-            long: 'J',
             float: 'F',
             bytes: 'B',
             str: 'Ljava/lang/String;',
