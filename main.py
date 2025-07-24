@@ -1,5 +1,6 @@
 import requests
 from kivy.app import App
+import configparser
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 
@@ -12,13 +13,18 @@ Config.set('graphics', 'height', '300')
 class WeatherLayout(BoxLayout):
     city_input = ObjectProperty(None)
     weather_info_label = ObjectProperty(None)
+    weather_icon = ObjectProperty(None)
 
     def search_weather(self):
-        api_key = "53a0ca1fcde43102647e4478d09ff07c"  # <-- Paste your API key here
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        api_key = config['openweathermap']['api_key']
+
         city_name = self.city_input.text.strip()
 
         if not city_name:
             self.weather_info_label.text = "Please enter a city name."
+            self.weather_icon.source = ''
             return
 
         # Show a "searching" message
@@ -38,13 +44,21 @@ class WeatherLayout(BoxLayout):
             else:
                 temp = weather_data['main']['temp']
                 description = weather_data['weather'][0]['description']
+                icon_code = weather_data['weather'][0]['icon']
+
+                # Update the weather icon
+                self.weather_icon.source = f"http://openweathermap.org/img/wn/{icon_code}@2x.png"
+
+                # Update the weather information label
                 self.weather_info_label.text = (f"City: {city_name.title()}\n"
                                                f"Temperature: {temp}°C\n"
                                                f"Description: {description.capitalize()}")
         except requests.exceptions.HTTPError:
             self.weather_info_label.text = "City not found or API error."
+            self.weather_icon.source = ''
         except requests.exceptions.RequestException:
             self.weather_info_label.text = "Failed to connect to the server."
+            self.weather_icon.source = ''
 
 
 class WeatherApp(App):

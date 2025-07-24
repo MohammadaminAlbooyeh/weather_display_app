@@ -20,10 +20,20 @@
             width: '100dp'
             on_press: root.search_weather()
 
-    Label:
-        id: weather_info_label
-        text: 'Weather information will be shown here.'
-        font_size: '20sp'
-        halign: 'center'
-        valign: 'middle'
-        text_size: self.width, None
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: 1
+
+        AsyncImage:
+            id: weather_icon
+            source: ''
+            size_hint_x: 0.4
+
+        Label:
+            id: weather_info_label
+            text: 'Weather information will be shown here.'
+            font_size: '20sp'
+            halign: 'left'
+            valign: 'middle'
+            text_size: self.width, None
+            size_hint_x: 0.6
