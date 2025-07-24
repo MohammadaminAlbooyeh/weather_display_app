@@ -75,6 +75,7 @@ class WeatherLayout(BoxLayout):
             city_name = weather_data.get('name', 'Unknown City')
             main_data = weather_data.get('main', {})
             temp = main_data.get('temp', 'N/A')
+            humidity = main_data.get('humidity', 'N/A')
 
             weather_list = weather_data.get('weather', [])
             if weather_list:
@@ -91,6 +92,7 @@ class WeatherLayout(BoxLayout):
 
             self.ids.weather_info_label.text = (f"City: {city_name}\n"
                                            f"Temperature: {temp}°C\n"
+                                           f"Humidity: {humidity}%\n"
                                            f"Description: {description.capitalize()}")
         except Exception as e:
             Logger.error(f"WeatherApp: Error processing successful API response: {e}", exc_info=True)
