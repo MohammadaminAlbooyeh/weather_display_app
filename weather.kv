@@ -1,0 +1,29 @@
+<WeatherLayout>:
+    orientation: 'vertical'
+    padding: 20
+    spacing: 10
+
+    BoxLayout:
+        size_hint_y: None
+        height: '40dp'
+        spacing: 10
+
+        TextInput:
+            id: city_input
+            hint_text: 'Enter city name...'
+            multiline: False
+            font_size: '18sp'
+
+        Button:
+            text: 'Search'
+            size_hint_x: None
+            width: '100dp'
+            on_press: root.search_weather()
+
+    Label:
+        id: weather_info_label
+        text: 'Weather information will be shown here.'
+        font_size: '20sp'
+        halign: 'center'
+        valign: 'middle'
+        text_size: self.width, None
