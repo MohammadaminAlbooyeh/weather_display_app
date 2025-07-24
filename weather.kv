@@ -1,51 +1,83 @@
+#:kivy 2.1.0
+
+# Color Palette for a modern dark theme
+#:set color_input_bg (51/255, 56/255, 66/255, 1) # Lighter Slate
+#:set color_accent (26/255, 128/255, 204/255, 1) # Bright Blue
+#:set color_text (0.95, 0.95, 0.95, 1)          # Off-white
+
 <WeatherLayout>:
-    orientation: 'vertical'
-    padding: 20
-    spacing: 10
+    # The background image, filling the whole screen
+    Image:
+        id: background_image
+        source: 'images/default.jpg' # Default background
+        allow_stretch: True
+        keep_ratio: False
 
+    # The main content layout, sitting on top of the background image
     BoxLayout:
-        size_hint_y: None
-        height: '40dp'
+        orientation: 'vertical'
+        padding: 20
         spacing: 10
-
-        TextInput:
-            id: city_input
-            hint_text: 'Enter city name...'
-            multiline: False
-            on_text_validate: root.search_weather()
-            font_size: '18sp'
-
-        Button:
-            text: 'Search'
-            size_hint_x: None
-            width: '100dp'
-            on_press: root.search_weather()
-
-    RelativeLayout:
-        # This layout holds both the results and the loading spinner
-        Spinner:
-            id: loading_spinner
-            size_hint: None, None
-            size: dp(46), dp(46)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            active: False
-            opacity: 0 # Hidden by default
+        # Add a semi-transparent overlay to make text readable on any background
+        canvas.before:
+            Color:
+                # A nice semi-transparent blue overlay
+                rgba: (20/255, 40/255, 80/255, 0.6)
+            Rectangle:
+                pos: self.pos
+                size: self.size
 
         BoxLayout:
-            id: results_layout
-            orientation: 'horizontal'
-            opacity: 1 # Visible by default
+            size_hint_y: None
+            height: '40dp'
+            spacing: 10
 
-            AsyncImage:
-                id: weather_icon
-                source: ''
-                size_hint_x: 0.4
+            TextInput:
+                id: city_input
+                hint_text: 'Enter city name...'
+                multiline: False
+                on_text_validate: root.search_weather()
+                font_size: '18sp'
+                background_color: color_input_bg
+                foreground_color: color_text
+                hint_text_color: 0.6, 0.6, 0.6, 1
+                cursor_color: color_accent
 
-            Label:
-                id: weather_info_label
-                text: 'Weather information will be shown here.'
-                font_size: '20sp'
-                halign: 'left'
-                valign: 'middle'
-                text_size: self.width, None
-                size_hint_x: 0.6
+            Button:
+                text: 'Search'
+                size_hint_x: None
+                width: '100dp'
+                on_press: root.search_weather()
+                background_color: color_accent
+                background_normal: ''  # This is crucial to show the background_color
+                color: color_text
+
+        RelativeLayout:
+            # This layout holds both the results and the loading spinner
+            Spinner:
+                id: loading_spinner
+                size_hint: None, None
+                size: dp(46), dp(46)
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                active: False
+                opacity: 0 # Hidden by default
+
+            BoxLayout:
+                id: results_layout
+                orientation: 'horizontal'
+                opacity: 1 # Visible by default
+
+                AsyncImage:
+                    id: weather_icon
+                    source: ''
+                    size_hint_x: 0.4
+
+                Label:
+                    id: weather_info_label
+                    text: 'Weather information will be shown here.'
+                    font_size: '20sp'
+                    halign: 'left'
+                    valign: 'middle'
+                    text_size: self.width, None
+                    size_hint_x: 0.6
+                    color: color_text
