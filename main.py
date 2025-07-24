@@ -1,8 +1,11 @@
 import requests
 from kivy.app import App
 import configparser
+import threading
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
+from kivy.logger import Logger
+from kivy.clock import mainthread
 
 # To prevent the window from being resized on some platforms
 from kivy.config import Config
@@ -14,51 +17,93 @@ class WeatherLayout(BoxLayout):
     city_input = ObjectProperty(None)
     weather_info_label = ObjectProperty(None)
     weather_icon = ObjectProperty(None)
+    results_layout = ObjectProperty(None)
+    loading_spinner = ObjectProperty(None)
 
     def search_weather(self):
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        api_key = config['openweathermap']['api_key']
-
-        city_name = self.city_input.text.strip()
-
+        city_name = self.ids.city_input.text.strip()
         if not city_name:
-            self.weather_info_label.text = "Please enter a city name."
-            self.weather_icon.source = ''
+            self.ids.weather_info_label.text = "Please enter a city name."
             return
 
-        # Show a "searching" message
-        self.weather_info_label.text = f"Searching for {city_name}..."
+        # Show the loading spinner and hide the results
+        self.show_loading(True)
 
-        # Build the API request URL
-        url = f"http://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={api_key}&units=metric"
+        # Run the network request in a separate thread to avoid freezing the UI
+        thread = threading.Thread(target=self._fetch_weather_data, args=(city_name,))
+        thread.start()
 
-        # Make the request to the server
+    def show_loading(self, is_loading):
+        self.ids.results_layout.opacity = 0 if is_loading else 1
+        self.ids.loading_spinner.opacity = 1 if is_loading else 0
+        self.ids.loading_spinner.active = is_loading
+
+    def _fetch_weather_data(self, city_name):
+        # This method runs in a background thread
         try:
-            response = requests.get(url)
-            response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)
+            config = configparser.ConfigParser()
+            config.read('config.ini')
+            api_key = config['openweathermap']['api_key']
+
+            url = f"http://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={api_key}&units=metric"
+
+            response = requests.get(url, timeout=10)  # Add a timeout for safety
+            response.raise_for_status()
             weather_data = response.json()
 
             if weather_data.get("cod") != 200:
-                self.weather_info_label.text = f"Error: {weather_data.get('message', 'City not found')}"
+                error_message = weather_data.get('message', 'City not found')
+                self._update_ui_on_error(f"Error: {error_message.capitalize()}")
             else:
-                temp = weather_data['main']['temp']
-                description = weather_data['weather'][0]['description']
-                icon_code = weather_data['weather'][0]['icon']
+                self._update_ui_on_success(weather_data)
 
-                # Update the weather icon
-                self.weather_icon.source = f"http://openweathermap.org/img/wn/{icon_code}@2x.png"
-
-                # Update the weather information label
-                self.weather_info_label.text = (f"City: {city_name.title()}\n"
-                                               f"Temperature: {temp}°C\n"
-                                               f"Description: {description.capitalize()}")
         except requests.exceptions.HTTPError:
-            self.weather_info_label.text = "City not found or API error."
-            self.weather_icon.source = ''
+            self._update_ui_on_error("City not found or API error.")
         except requests.exceptions.RequestException:
-            self.weather_info_label.text = "Failed to connect to the server."
-            self.weather_icon.source = ''
+            self._update_ui_on_error("Failed to connect to the server.")
+        except (configparser.Error, KeyError):
+            self._update_ui_on_error("Error reading API key from config.ini.")
+        except Exception as e:
+            # Use Kivy's logger for better error reporting
+            Logger.error(f"WeatherApp: An unexpected error occurred in fetch thread: {e}", exc_info=True)
+            self._update_ui_on_error("An unexpected error occurred.")
+
+    @mainthread
+    def _update_ui_on_success(self, weather_data):
+        try:
+            # Safely access all data with .get() to prevent crashes from unexpected API responses
+            city_name = weather_data.get('name', 'Unknown City')
+            main_data = weather_data.get('main', {})
+            temp = main_data.get('temp', 'N/A')
+
+            weather_list = weather_data.get('weather', [])
+            if weather_list:
+                description = weather_list[0].get('description', 'No description')
+                icon_code = weather_list[0].get('icon', '')
+            else:
+                description = 'No description'
+                icon_code = ''
+
+            if icon_code:
+                self.ids.weather_icon.source = f"http://openweathermap.org/img/wn/{icon_code}@2x.png"
+            else:
+                self.ids.weather_icon.source = ''
+
+            self.ids.weather_info_label.text = (f"City: {city_name}\n"
+                                           f"Temperature: {temp}°C\n"
+                                           f"Description: {description.capitalize()}")
+        except Exception as e:
+            Logger.error(f"WeatherApp: Error processing successful API response: {e}", exc_info=True)
+            self._update_ui_on_error("Failed to parse weather data.")
+        finally:
+            # Ensure the loading spinner is always hidden after processing
+            self.show_loading(False)
+
+    @mainthread
+    def _update_ui_on_error(self, message):
+        self.ids.weather_info_label.text = message
+        self.ids.weather_icon.source = ''
+        self.show_loading(False)
 
 
 class WeatherApp(App):

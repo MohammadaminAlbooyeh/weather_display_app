@@ -12,6 +12,7 @@
             id: city_input
             hint_text: 'Enter city name...'
             multiline: False
+            on_text_validate: root.search_weather()
             font_size: '18sp'
 
         Button:
@@ -20,20 +21,31 @@
             width: '100dp'
             on_press: root.search_weather()
 
-    BoxLayout:
-        orientation: 'horizontal'
-        size_hint_y: 1
+    RelativeLayout:
+        # This layout holds both the results and the loading spinner
+        Spinner:
+            id: loading_spinner
+            size_hint: None, None
+            size: dp(46), dp(46)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            active: False
+            opacity: 0 # Hidden by default
 
-        AsyncImage:
-            id: weather_icon
-            source: ''
-            size_hint_x: 0.4
+        BoxLayout:
+            id: results_layout
+            orientation: 'horizontal'
+            opacity: 1 # Visible by default
 
-        Label:
-            id: weather_info_label
-            text: 'Weather information will be shown here.'
-            font_size: '20sp'
-            halign: 'left'
-            valign: 'middle'
-            text_size: self.width, None
-            size_hint_x: 0.6
+            AsyncImage:
+                id: weather_icon
+                source: ''
+                size_hint_x: 0.4
+
+            Label:
+                id: weather_info_label
+                text: 'Weather information will be shown here.'
+                font_size: '20sp'
+                halign: 'left'
+                valign: 'middle'
+                text_size: self.width, None
+                size_hint_x: 0.6
