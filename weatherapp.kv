@@ -12,12 +12,12 @@
     # Layer 1: Gradient Background (Canvas)
     canvas.before:
         Color:
-            rgba: (0.60, 0.70, 0.98, 0.82) 
+            rgba: (0.40, 0.60, 1, 0.15) 
         Rectangle:
             pos: self.pos
             size: self.size
         Color:
-            rgba: (0.85, 0.70, 0.98, 0.38) 
+            rgba: (0.45, 0.60, 1, 0.15) 
         Rectangle:
             pos: self.pos
             size: self.size
@@ -50,7 +50,7 @@
                 background_color: (1, 1, 1, 0.15)
                 foreground_color: (0, 0, 0, 1) 
                 padding: dp(12), dp(10)
-                cursor_color: (0.7, 0.4, 0.95, 1)
+                cursor_color: (0.0, 0.0, 0.0, 1)
                 halign: 'center'
                 font_name: 'Roboto'
                 on_text_validate: root.search_weather()
@@ -92,12 +92,6 @@
             id: results_layout
             opacity: 0 # Initially hidden
 
-            Image:
-                id: weather_icon
-                size_hint: None, None
-                size: dp(120), dp(120)
-                pos_hint: {'center_x': 0.5, 'top': 1}
-
             # Modern result box
             BoxLayout:
                 orientation: 'vertical'
@@ -119,6 +113,11 @@
                         pos: self.x, self.y - 4
                         size: self.width, self.height + 8
 
+                Image:
+                    id: weather_icon
+                    size_hint: None, None
+                    size: dp(90), dp(90)
+                    pos_hint: {'center_x': 0.5}
                 Label:
                     id: weather_info_label
                     font_size: '20sp'

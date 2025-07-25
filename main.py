@@ -10,7 +10,7 @@ from kivy.clock import mainthread
 # To prevent the window from being resized on some platforms
 from kivy.config import Config
 Config.set('graphics', 'width', '400')
-Config.set('graphics', 'height', '300')
+Config.set('graphics', 'height', '480')
 
 
 class WeatherLayout(FloatLayout):
