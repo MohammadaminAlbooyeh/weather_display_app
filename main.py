@@ -82,7 +82,6 @@ class WeatherLayout(FloatLayout):
     @mainthread
     def _update_ui_on_success(self, weather_data):
         try:
-            # Safely access all data with .get() to prevent crashes from unexpected API responses
             city_name = weather_data.get('name', 'Unknown City')
             main_data = weather_data.get('main', {})
             temp = main_data.get('temp', 'N/A')
@@ -93,19 +92,35 @@ class WeatherLayout(FloatLayout):
             if weather_list:
                 description = weather_list[0].get('description', 'No description')
                 icon_code = weather_list[0].get('icon', '')
-                # Get the main weather condition (e.g., 'Clouds', 'Clear', 'Rain')
                 weather_main_condition = weather_list[0].get('main', '')
             else:
                 description = 'No description'
                 icon_code = ''
 
-            # Set the background image based on the weather condition
             self.ids.background_image.source = self._get_background_image(weather_main_condition)
 
-            if icon_code:
-                self.ids.weather_icon.source = f"http://openweathermap.org/img/wn/{icon_code}@2x.png"
+
+            icon_path = ''
+            condition = weather_main_condition.lower()
+            if 'clear' in condition:
+                icon_path = 'images/icons/clear.png'
+            elif 'clouds' in condition:
+                icon_path = 'images/icons/clouds.png'
+            elif 'rain' in condition or 'drizzle' in condition:
+                icon_path = 'images/icons/rain.png'
+            elif 'snow' in condition:
+                icon_path = 'images/icons/snow.png'
+            elif 'thunderstorm' in condition:
+                icon_path = 'images/icons/thunderstorm.png'
+            else:
+                icon_path = 'images/icons/default.png'
+
+            if icon_path:
+                self.ids.weather_icon.source = icon_path
+                self.ids.weather_icon.opacity = 1
             else:
                 self.ids.weather_icon.source = ''
+                self.ids.weather_icon.opacity = 0
 
             self.ids.weather_info_label.text = (f"City: {city_name}\n"
                                            f"Temperature: {temp}°C\n"
@@ -115,13 +130,13 @@ class WeatherLayout(FloatLayout):
             Logger.error(f"WeatherApp: Error processing successful API response: {e}", exc_info=True)
             self._update_ui_on_error("Failed to parse weather data.")
         finally:
-            # Ensure the loading spinner is always hidden after processing
             self.show_loading(False)
 
     @mainthread
     def _update_ui_on_error(self, message):
         self.ids.weather_info_label.text = message
         self.ids.weather_icon.source = ''
+        self.ids.weather_icon.opacity = 0
         self.ids.background_image.source = 'images/default.jpg'
         self.show_loading(False)
 
