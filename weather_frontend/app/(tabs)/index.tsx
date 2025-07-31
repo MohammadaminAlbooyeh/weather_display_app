@@ -1,6 +1,8 @@
-import { StyleSheet, View, Image as RNImage, ScrollView } from 'react-native';
+
+
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Image as RNImage, ScrollView, Dimensions, PixelRatio } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 
 export default function HomeScreen() {
@@ -35,13 +37,8 @@ export default function HomeScreen() {
         ) : weather ? (
           <>
             <ThemedText style={styles.conditionMain}>{weather.condition}</ThemedText>
-            <RNImage
-              source={{ uri: 'https://cdn-icons-png.flaticon.com/512/1163/1163661.png' }}
-              style={styles.weatherIconBig}
-            />
-            <View style={{ alignItems: 'center', marginTop: 0, marginBottom: 8 }}>
-              <ThemedText style={styles.tempBig}>{weather.temperature}°</ThemedText>
-            </View>
+            {/* Only show temperature, no extra container */}
+            <ThemedText style={[styles.tempBig, { alignSelf: 'center', marginBottom: 8 }]}>{weather.temperature}°</ThemedText>
             <ThemedText style={styles.date}>Mon June 17 | 10:00 AM</ThemedText>
             <ThemedText style={styles.hilo}>H:27  L:18</ThemedText>
             <View style={styles.detailsRow}>
@@ -75,129 +72,151 @@ export default function HomeScreen() {
   );
 }
 
+
+// Responsive scaling helpers
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const scale = SCREEN_WIDTH / 375; // iPhone 11 Pro width baseline
+function normalize(size: number) {
+  const newSize = size * scale;
+  return Math.round(PixelRatio.roundToNearestPixel(newSize));
+}
+
 const styles = StyleSheet.create({
   gradient: {
     flex: 1,
   },
   scrollContent: {
     alignItems: 'center',
-    paddingVertical: 40,
+    paddingVertical: normalize(40),
     minHeight: '100%',
   },
   conditionMain: {
     color: '#fff',
-    fontSize: 22,
+    fontSize: normalize(22),
     fontWeight: '600',
-    marginBottom: 8,
-    marginTop: 10,
+    marginBottom: normalize(8),
+    marginTop: normalize(10),
   },
   weatherIconBig: {
-    width: 90,
-    height: 90,
-    marginBottom: -10,
-    marginTop: 10,
+    width: normalize(110),
+    height: normalize(110),
+    marginBottom: normalize(-10),
+    marginTop: normalize(10),
   },
   date: {
     color: '#fff',
-    fontSize: 16,
-    marginBottom: 8,
+    fontSize: normalize(16),
+    marginBottom: normalize(8),
   },
   tempBig: {
     color: '#fff',
-    fontSize: 80,
+    fontSize: normalize(90),
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: normalize(20),
     textShadowColor: 'rgba(0,0,0,0.5)',
     textShadowOffset: { width: 0, height: 3 },
     textShadowRadius: 10,
     backgroundColor: 'rgba(0,0,0,0.2)',
-    paddingHorizontal: 12,
-    borderRadius: 10,
+    paddingHorizontal: normalize(12),
+    borderRadius: normalize(10),
   },
   hilo: {
     color: '#fff',
-    fontSize: 16,
-    marginBottom: 18,
+    fontSize: normalize(16),
+    marginBottom: normalize(18),
   },
   detailsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: 300,
-    marginBottom: 18,
+    width: normalize(340),
+    marginBottom: normalize(18),
+    backgroundColor: 'rgba(40,30,80,0.18)',
+    borderRadius: normalize(22),
+    paddingVertical: normalize(8),
+    alignSelf: 'center',
   },
   detailBox: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 12,
-    padding: 10,
-    width: 80,
+    backgroundColor: 'transparent',
+    borderRadius: normalize(18),
+    paddingVertical: normalize(10),
+    paddingHorizontal: 0,
+    width: normalize(100),
+    height: normalize(90),
+    justifyContent: 'center',
   },
   detailIcon: {
-    width: 28,
-    height: 28,
-    marginBottom: 4,
+    width: normalize(44),
+    height: normalize(44),
+    marginBottom: normalize(6),
   },
   detailValue: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: normalize(20),
+    marginBottom: normalize(2),
   },
   detailLabel: {
     color: '#fff',
-    fontSize: 13,
+    fontSize: normalize(15),
   },
   hourlyRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: 320,
-    marginBottom: 8,
-    marginTop: 10,
+    width: normalize(340),
+    marginBottom: normalize(8),
+    marginTop: normalize(10),
+    alignSelf: 'center',
   },
   today: {
-    color: '#fff',
+    color: '#ffd700',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: normalize(18),
   },
   next7: {
     color: '#ffd700',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: normalize(18),
   },
   hourlyScroll: {
-    width: 320,
-    marginBottom: 10,
+    width: normalize(340),
+    marginBottom: normalize(10),
+    alignSelf: 'center',
   },
   hourBox: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderRadius: 12,
-    padding: 10,
-    marginRight: 10,
-    width: 60,
+    backgroundColor: 'rgba(255,255,255,0.13)',
+    borderRadius: normalize(18),
+    paddingVertical: normalize(12),
+    paddingHorizontal: 0,
+    marginRight: normalize(14),
+    width: normalize(70),
+    height: normalize(90),
+    justifyContent: 'center',
   },
   hourTime: {
     color: '#fff',
-    fontSize: 13,
-    marginBottom: 2,
+    fontSize: normalize(15),
+    marginBottom: normalize(4),
   },
   hourIcon: {
-    width: 28,
-    height: 28,
-    marginBottom: 2,
+    width: normalize(36),
+    height: normalize(36),
+    marginBottom: normalize(4),
   },
   hourTemp: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: normalize(18),
   },
   loading: {
     color: '#fff',
-    fontSize: 18,
-    marginTop: 40,
+    fontSize: normalize(20),
+    marginTop: normalize(40),
   },
   error: {
     color: 'red',
-    fontSize: 18,
-    marginTop: 40,
+    fontSize: normalize(20),
+    marginTop: normalize(40),
   },
 });

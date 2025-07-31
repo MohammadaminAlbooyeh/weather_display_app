@@ -1,0 +1,8 @@
+# Backend (Python/Flask)
+flask
+
+# Frontend (React Native/Expo)
+expo
+react
+react-native
+expo-linear-gradient
